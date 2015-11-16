@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
+using LitJson;
 
 [ExecuteInEditMode]
 public class Headmesh : MonoBehaviour {
@@ -8,42 +8,35 @@ public class Headmesh : MonoBehaviour {
     {
         get { return _Morphs; }
     }
-    private Morph[] _Morphs = new Morph[] {
 
-        new Morph { Name = "Size",          NameInternal = "neck_size",         HasNegativeValues = true,  Category = "Neck" },
-        new Morph { Name = "Size",          NameInternal = "upper_lip_size",    HasNegativeValues = false, Category = "Lip>Upper" },
-        new Morph { Name = "Size",          NameInternal = "lower_lip_size",    HasNegativeValues = false, Category = "Lip>Lower" },
-        new Morph { Name = "Depth",         NameInternal = "mouth_depth",       HasNegativeValues = true,  Category = "Mouth" },
-        new Morph { Name = "Width",         NameInternal = "mouth_width",       HasNegativeValues = true,  Category = "Mouth" },
-        new Morph { Name = "Height",        NameInternal = "nose_height",       HasNegativeValues = true,  Category = "Nose" },
-        new Morph { Name = "Angle",         NameInternal = "nose_angle",        HasNegativeValues = true,  Category = "Nose" },
-        new Morph { Name = "Depth",         NameInternal = "nose_depth",        HasNegativeValues = true,  Category = "Nose" },
-        new Morph { Name = "Depth",         NameInternal = "nose_tip_depth",    HasNegativeValues = true,  Category = "Nose>Tip" },
-        new Morph { Name = "Height",        NameInternal = "nose_tip_height",   HasNegativeValues = true,  Category = "Nose>Tip" },
-        new Morph { Name = "Width",         NameInternal = "chin_width",        HasNegativeValues = false, Category = "Chin" },
-        new Morph { Name = "Height",        NameInternal = "chin_height",       HasNegativeValues = false, Category = "Chin" },
-        new Morph { Name = "Hairline Puff", NameInternal = "hairline_puff",     HasNegativeValues = false, Category = "" },
-        new Morph { Name = "Fat",           NameInternal = "cheek_fat",         HasNegativeValues = true,  Category = "Cheek" },
-        new Morph { Name = "Depth",         NameInternal = "cheek_depth",       HasNegativeValues = true,  Category = "Cheek" }
+    private Morph[] _Morphs;
 
-    };
-
-    [SerializeField]
-    private float[] MorphValues;
-    private SkinnedMeshRenderer SkinnedRenderer;
+    public string DatafilePath;  // A datafile that
+    public SkinnedMeshRenderer SkinnedRenderer;
 
     void Awake()
     {
-        MorphValues = new float[Morphs.Length];
-        SkinnedRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
+        
+    }
+
+    public MorphJsonType ReadMorphFile(string DataPath)
+    {
+        string json = Resources.Load<TextAsset>(DataPath).text;
+        MorphJsonType raw = JsonMapper.ToObject<MorphJsonType>(json);
+        
+        if(!raw.Prototype.Equals(""))
+        {
+            TextAsset prototype = Resources.Load<TextAsset>(Data.)
+        }
+        
     }
     
     public void SetMorphValue(int morph_index, float value)
     {
         Morph morph = Morphs[morph_index];
-        if (morph.HasNegativeValues && value < 0)
+        if (!morph.HasNegativeValues && value < 0)
             return;
-        value = Mathf.Clamp01(value);
+        value = Mathf.Clamp(value,-1,1);
 
         string shapename = morph.NameInternal;
         if(morph.HasNegativeValues)
@@ -59,17 +52,27 @@ public class Headmesh : MonoBehaviour {
         {
             if (m.GetBlendShapeName(x).Equals(shapename))
             {
-                SkinnedRenderer.SetBlendShapeWeight(x, Mathf.Abs(value));
+                SkinnedRenderer.SetBlendShapeWeight(x, Mathf.Abs(value)*100);
                 break;
             }
         }
         
-        MorphValues[morph_index] = value;
+        Morphs[morph_index].Value = value;
+    }
+
+    public void Randomize()
+    {
+        for (int x = 0; x < Morphs.Length; x++)
+        {
+            float min = Morphs[x].HasNegativeValues ? -1 : 0;
+            if(!Morphs[x].NameInternal.StartsWith("hairline"))
+                SetMorphValue(x, Random.Range(min, 1));
+        }
     }
 
     public float GetMorphValue(int morph_index)
     {
-        return MorphValues[morph_index];
+        return Morphs[morph_index].Value;
     }
 
     public struct Morph
@@ -79,5 +82,12 @@ public class Headmesh : MonoBehaviour {
         public string Category;
         public bool HasNegativeValues;
         public float Value;
+    }
+
+    private struct MorphJsonType
+    {
+        public string Name;
+        public string Prototype;
+        public Morph[] Morphs;
     }
 }

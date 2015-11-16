@@ -12,6 +12,15 @@ public class HeadmeshEditor : Editor {
     {
         head = target as Headmesh;
 
+        EditorGUI.BeginChangeCheck();
+        SkinnedMeshRenderer rend = EditorGUILayout.ObjectField("Skinned Mesh Renderer: ", head.SkinnedRenderer, typeof(SkinnedMeshRenderer), true) as SkinnedMeshRenderer;
+        if(EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(head, "Change Headmesh Renderer");
+            head.SkinnedRenderer = rend;
+            EditorUtility.SetDirty(head);
+        }
+
         if(Root == null)
         {
             Root = new MorphDirectory();
@@ -20,6 +29,14 @@ public class HeadmeshEditor : Editor {
         }
 
         TraverseTree(Root);
+
+        if (GUILayout.Button("Randomize"))
+        {
+            Undo.RecordObject(head, "Randomize Headmesh");
+            head.Randomize();
+            EditorUtility.SetDirty(head);
+        }
+            
     }
 
     private void TraverseTree(MorphDirectory p)
@@ -30,12 +47,14 @@ public class HeadmeshEditor : Editor {
 
             if (!p.Open)
                 return;
+
+            EditorGUI.indentLevel++;
         }
-        
+
         foreach (MorphDirectory q in p.subdirectories)
             TraverseTree(q);
-
-        for(int x=0;x<p.submorphs.Count;x++)
+        
+        for (int x=0;x<p.submorphs.Count;x++)
         {
             EditorGUI.BeginChangeCheck();
 
@@ -52,6 +71,9 @@ public class HeadmeshEditor : Editor {
                 EditorUtility.SetDirty(head);
             }
         }
+
+        if(!p.Path.Equals(""))
+            EditorGUI.indentLevel--;
     }
 
     private bool PlaceMorph(MorphDirectory p, Headmesh.Morph q, int index)
@@ -66,21 +88,26 @@ public class HeadmeshEditor : Editor {
         foreach (MorphDirectory sub in p.subdirectories)
         {
             if (PlaceMorph(sub, q, index))
-            {
-                p.submorphs.Add(q);
-                p.submorph_indexes.Add(index);
                 return true;
-            }
         }
                 
 
         if(q.Category.StartsWith(p.Path))
         {
             MorphDirectory d = new MorphDirectory();
-            d.Name = q.Category.Substring(p.Path.Length).Split('>')[0];
-            d.Path = p.Path+'>'+d.Name;
+            
+            if (p.Path.Equals(""))
+            {
+                d.Name = q.Category.Split('>')[0];
+                d.Path = d.Name;
+            }
+            else
+            {
+                d.Name = q.Category.Substring(p.Path.Length+1).Split('>')[0];
+                d.Path = p.Path + '>' + d.Name;
+            }
             p.subdirectories.Add(d);
-            return PlaceMorph(d,q, index);
+            return PlaceMorph(d, q, index);
         }
 
         return false;

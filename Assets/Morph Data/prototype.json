@@ -1,0 +1,111 @@
+{
+	"Name": "Default Male",
+	"Prototype": "",
+	"Morphs": [
+		{
+			"Name": "Size",
+			"NameInternal": "neck_size",
+			"HasNegativeValues": true,
+			"Category": "Neck",
+			"Value": 0
+		},
+		{
+			"Name": "Size",
+			"NameInternal": "upper_lip_size",
+			"HasNegativeValues": false,
+			"Category": "Lips>Upper",
+			"Value": 0
+		},
+		{
+			"Name": "Size",
+			"NameInternal": "lower_lip_size",
+			"HasNegativeValues": false,
+			"Category": "Lips>Lower",
+			"Value": 0
+		},
+		{
+			"Name": "Depth",
+			"NameInternal": "mouth_depth",
+			"HasNegativeValues": true,
+			"Category": "Lips",
+			"Value": 0
+		},
+		{
+			"Name": "Width",
+			"NameInternal": "mouth_width",
+			"HasNegativeValues": true,
+			"Category": "Lips",
+			"Value": 0
+		},
+		{
+			"Name": "Height",
+			"NameInternal": "nose_height",
+			"HasNegativeValues": true,
+			"Category": "Nose",
+			"Value": 0
+		},
+		{
+			"Name": "Angle",
+			"NameInternal": "nose_angle",
+			"HasNegativeValues": true,
+			"Category": "Nose",
+			"Value": 0
+		},
+		{
+			"Name": "Depth",
+			"NameInternal": "nose_depth",
+			"HasNegativeValues": true,
+			"Category": "Nose",
+			"Value": 0
+		},
+		{
+			"Name": "Depth",
+			"NameInternal": "nose_tip_depth",
+			"HasNegativeValues": true,
+			"Category": "Nose>Tip",
+			"Value": 0
+		},
+		{
+			"Name": "Height",
+			"NameInternal": "nose_tip_height",
+			"HasNegativeValues": true,
+			"Category": "Nose>Tip",
+			"Value": 0
+		},
+		{
+			"Name": "Width",
+			"NameInternal": "chin_width",
+			"HasNegativeValues": false,
+			"Category": "Chin",
+			"Value": 0
+		},
+		{
+			"Name": "Height",
+			"NameInternal": "chin_height",
+			"HasNegativeValues": false,
+			"Category": "Chin",
+			"Value": 0
+		},
+		{
+			"Name": "Hairline Puff",
+			"NameInternal": "hairline_puff",
+			"HasNegativeValues": false,
+			"Category": "",
+			"Value": 0
+		},
+		{
+			"Name": "Fat",
+			"NameInternal": "cheek_fat",
+			"HasNegativeValues": true,
+			"Category": "Cheek",
+			"Value": 0
+		},
+		{
+			"Name": "Depth",
+			"NameInternal": "cheek_depth",
+			"HasNegativeValues": true,
+			"Category": "Cheek",
+			"Value": 0
+		}
+	]
+}
