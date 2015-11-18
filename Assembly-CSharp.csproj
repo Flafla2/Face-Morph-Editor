@@ -47,11 +47,15 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\Headmesh.cs" />
      <Compile Include="Assets\Scripts\HeadmeshEditor.cs" />
+     <Compile Include="Assets\Scripts\HeadmeshRandomizer.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.Networking">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
+ </Reference>
+ <Reference Include="LitJson">
+ <HintPath>C:/Users/Oculus/Documents/Head_Morph_Test/Assets/LitJson.dll</HintPath>
  </Reference>
  <Reference Include="Mono.Cecil">
  <HintPath>C:/Program Files/Unity/Editor/Data/Managed/Mono.Cecil.dll</HintPath>

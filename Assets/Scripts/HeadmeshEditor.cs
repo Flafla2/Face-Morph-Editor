@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System;
+using System.IO;
 using System.Collections.Generic;
 
 [CustomEditor(typeof(Headmesh))]
@@ -7,25 +9,56 @@ public class HeadmeshEditor : Editor {
 
     private MorphDirectory Root;
     private Headmesh head;
+    private string writepath = null;
+
+    void OnEnable()
+    {
+        head = target as Headmesh;
+        head.LoadFile();
+
+        Root = new MorphDirectory();
+        for (int x = 0; x < head.Morphs.Length; x++)
+            PlaceMorph(Root, head.Morphs[x], x);
+
+        Undo.undoRedoPerformed += OnUndoRedo;
+    }
+
+    private void OnUndoRedo()
+    {
+        Root = new MorphDirectory();
+        for (int x = 0; x < head.Morphs.Length; x++)
+            PlaceMorph(Root, head.Morphs[x], x);
+    }
 
     public override void OnInspectorGUI()
     {
-        head = target as Headmesh;
-
         EditorGUI.BeginChangeCheck();
         SkinnedMeshRenderer rend = EditorGUILayout.ObjectField("Skinned Mesh Renderer: ", head.SkinnedRenderer, typeof(SkinnedMeshRenderer), true) as SkinnedMeshRenderer;
-        if(EditorGUI.EndChangeCheck())
+        if (EditorGUI.EndChangeCheck())
         {
             Undo.RecordObject(head, "Change Headmesh Renderer");
             head.SkinnedRenderer = rend;
             EditorUtility.SetDirty(head);
         }
 
-        if(Root == null)
+        if (head.SkinnedRenderer == null)
+            return;
+
+        EditorGUI.BeginChangeCheck();
+        TextAsset asset = EditorGUILayout.ObjectField("Data File: ", head.Datafile, typeof(TextAsset), false) as TextAsset;
+        if (EditorGUI.EndChangeCheck())
         {
+            Undo.RecordObject(head, "Change Headmesh Datafile");
+
+            head.Datafile = asset;
+            head.DatafilePath = AssetDatabase.GetAssetPath(asset);
+            head.LoadFile();
+
             Root = new MorphDirectory();
-            for(int x=0;x<head.Morphs.Length;x++)
+            for (int x = 0; x < head.Morphs.Length; x++)
                 PlaceMorph(Root, head.Morphs[x], x);
+
+            EditorUtility.SetDirty(head);
         }
 
         TraverseTree(Root);
@@ -36,6 +69,27 @@ public class HeadmeshEditor : Editor {
             head.Randomize();
             EditorUtility.SetDirty(head);
         }
+
+        if (head.Datafile == null || head.DatafilePath == null)
+            return;
+
+        if(writepath == null)
+        {
+            string[] split = head.DatafilePath.Split('/');
+            Array.Resize<string>(ref split, split.Length - 1);
+            writepath = string.Join("/", split) + "/saved.json";
+        }
+
+        writepath = EditorGUILayout.TextField("Save Path: ",writepath);
+
+        GUI.enabled = writepath.EndsWith(".json");
+        if (GUILayout.Button("Save"))
+        {
+            File.WriteAllText(head.WriteJson(), Application.dataPath + "/" + writepath);
+            head.DatafilePath = writepath;
+            head.Datafile = Resources.Load<TextAsset>(writepath);
+        }
+        GUI.enabled = true;
             
     }
 

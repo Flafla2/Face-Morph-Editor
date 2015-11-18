@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using LitJson;
+using System;
+using System.Collections.Generic;
 
-[ExecuteInEditMode]
 public class Headmesh : MonoBehaviour {
 
     public Morph[] Morphs
@@ -11,24 +12,92 @@ public class Headmesh : MonoBehaviour {
 
     private Morph[] _Morphs;
 
-    public string DatafilePath;  // A datafile that
+    public string Name;
+
+    public TextAsset Datafile = null;
+    public string DatafilePath= null;
     public SkinnedMeshRenderer SkinnedRenderer;
 
     void Awake()
     {
-        
+        LoadFile();
     }
 
-    public MorphJsonType ReadMorphFile(string DataPath)
+    public void LoadFile()
     {
-        string json = Resources.Load<TextAsset>(DataPath).text;
-        MorphJsonType raw = JsonMapper.ToObject<MorphJsonType>(json);
-        
-        if(!raw.Prototype.Equals(""))
+        MorphJsonType type = ReadMorphFile(Datafile, DatafilePath);
+        _Morphs = type.Morphs;
+        Name = type.Name;
+    }
+
+    public string WriteJson()
+    {
+        MorphJsonType type = new MorphJsonType();
+        type.Morphs = Morphs;
+        type.Name = Name;
+        type.Prototype = DatafilePath;
+        return JsonMapper.ToJson(type);
+    }
+
+    private static MorphJsonType ReadMorphFile(TextAsset Data, string DataPath, bool add_elements = false)
+    {
+        if (Data == null) // Can't find raw
         {
-            TextAsset prototype = Resources.Load<TextAsset>(Data.)
+            MorphJsonType morph = new MorphJsonType();
+            morph.Morphs = new Morph[0];
+            return morph;
         }
-        
+
+        string json = Data.text;
+        MorphJsonType raw = JsonMapper.ToObject<MorphJsonType>(json);
+
+        bool has_prototype = !raw.Prototype.Equals("");
+
+        if (has_prototype)
+        {
+            string[] split = DataPath.Split('/');
+            Array.Resize<string>(ref split, split.Length - 1);
+            string ptype_path = string.Join("/", split) + "/" + raw.Prototype;
+            TextAsset prototype = Resources.Load<TextAsset>(ptype_path);
+            if (prototype == null) // Can't find prototype
+            { 
+                MorphJsonType morph = new MorphJsonType();
+                morph.Morphs = new Morph[0];
+                return morph;
+            }
+
+            MorphJsonType ptype = ReadMorphFile(prototype, ptype_path, add_elements);
+            if (raw.Name == null)
+                ptype.Name = raw.Name;
+            Resources.UnloadAsset(prototype); prototype = null;
+
+            List<Morph> temp = new List<Morph>(ptype.Morphs.Length);
+            for (int x = 0; x < ptype.Morphs.Length; x++)
+            {
+                Morph m = ptype.Morphs[x];
+                bool found = false;
+                foreach (Morph q in raw.Morphs)
+                {
+                    if (q.NameInternal.Equals(m.NameInternal))
+                    {
+                        m.Value = q.Value;
+                        m.Name = q.Name;
+                        m.Category = q.Category;
+                        m.HasNegativeValues = q.HasNegativeValues;
+                        found = true;
+
+                        temp.Add(m);
+                        break;
+                    }
+                }
+                if(!found && add_elements)
+                    temp.Add(m);
+            }
+            ptype.Morphs = temp.ToArray();
+            return ptype;
+        }
+        else
+            return raw;
     }
     
     public void SetMorphValue(int morph_index, float value)
@@ -66,7 +135,7 @@ public class Headmesh : MonoBehaviour {
         {
             float min = Morphs[x].HasNegativeValues ? -1 : 0;
             if(!Morphs[x].NameInternal.StartsWith("hairline"))
-                SetMorphValue(x, Random.Range(min, 1));
+                SetMorphValue(x, UnityEngine.Random.Range(min, 1));
         }
     }
 
