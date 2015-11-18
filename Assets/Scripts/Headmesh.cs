@@ -139,7 +139,7 @@ public class Headmesh : MonoBehaviour {
         }
     }
 
-    public float GetMorphValue(int morph_index)
+    public double GetMorphValue(int morph_index)
     {
         return Morphs[morph_index].Value;
     }
@@ -150,7 +150,7 @@ public class Headmesh : MonoBehaviour {
         public string NameInternal;
         public string Category;
         public bool HasNegativeValues;
-        public float Value;
+        public double Value;
     }
 
     private struct MorphJsonType

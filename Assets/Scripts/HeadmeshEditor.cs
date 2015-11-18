@@ -85,7 +85,11 @@ public class HeadmeshEditor : Editor {
         GUI.enabled = writepath.EndsWith(".json");
         if (GUILayout.Button("Save"))
         {
-            File.WriteAllText(head.WriteJson(), Application.dataPath + "/" + writepath);
+            string path = Application.dataPath + "/" + writepath.Substring(7); //substring because Assets/ is contained in both paths
+            path = path.Replace('/', Path.DirectorySeparatorChar);
+            Debug.Log(path);
+            File.WriteAllText(head.WriteJson(), path);
+           
             head.DatafilePath = writepath;
             head.Datafile = Resources.Load<TextAsset>(writepath);
         }
@@ -114,7 +118,7 @@ public class HeadmeshEditor : Editor {
 
             float slider = EditorGUILayout.Slider(
                 p.submorphs[x].Name,
-                head.GetMorphValue(p.submorph_indexes[x]),
+                (float)head.GetMorphValue(p.submorph_indexes[x]),
                 p.submorphs[x].HasNegativeValues ? -1 : 0,
                 1);
 
