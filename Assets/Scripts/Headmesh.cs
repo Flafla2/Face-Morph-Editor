@@ -2,6 +2,7 @@
 using LitJson;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 public class Headmesh : MonoBehaviour {
 
@@ -9,13 +10,11 @@ public class Headmesh : MonoBehaviour {
     {
         get { return _Morphs; }
     }
-
     private Morph[] _Morphs;
 
-    public string Name;
+    public string Name { get; set; }
 
-    public TextAsset Datafile = null;
-    public string DatafilePath= null;
+    public string DatafilePath = null;
     public SkinnedMeshRenderer SkinnedRenderer;
 
     void Awake()
@@ -25,22 +24,33 @@ public class Headmesh : MonoBehaviour {
 
     public void LoadFile()
     {
-        MorphJsonType type = ReadMorphFile(Datafile, DatafilePath);
+        MorphJsonType type = ReadMorphFile(DatafilePath);
         _Morphs = type.Morphs;
+        for (int x = 0; x < _Morphs.Length; x++)
+            SetMorphValue(x, (float)Morphs[x].Value); // Sets the value on the skinned mesh
         Name = type.Name;
     }
 
-    public string WriteJson()
+    public string WriteJson(bool prototype)
     {
         MorphJsonType type = new MorphJsonType();
         type.Morphs = Morphs;
         type.Name = Name;
-        type.Prototype = DatafilePath;
-        return JsonMapper.ToJson(type);
+        if (prototype)
+            type.Prototype = DatafilePath;
+        else
+            type.Prototype = "";
+
+        StringBuilder sb = new StringBuilder();
+        JsonWriter wr = new JsonWriter(sb);
+        wr.PrettyPrint = true;
+        JsonMapper.ToJson(type, wr);
+        return sb.ToString();
     }
 
-    private static MorphJsonType ReadMorphFile(TextAsset Data, string DataPath, bool add_elements = false)
+    private static MorphJsonType ReadMorphFile(string DataPath, bool add_elements = false)
     {
+        TextAsset Data = Resources.Load<TextAsset>(DataPath);
         if (Data == null) // Can't find raw
         {
             MorphJsonType morph = new MorphJsonType();
@@ -57,8 +67,8 @@ public class Headmesh : MonoBehaviour {
         {
             string[] split = DataPath.Split('/');
             Array.Resize<string>(ref split, split.Length - 1);
-            string ptype_path = string.Join("/", split) + "/" + raw.Prototype;
-            TextAsset prototype = Resources.Load<TextAsset>(ptype_path);
+
+            TextAsset prototype = Resources.Load<TextAsset>(raw.Prototype);
             if (prototype == null) // Can't find prototype
             { 
                 MorphJsonType morph = new MorphJsonType();
@@ -66,10 +76,10 @@ public class Headmesh : MonoBehaviour {
                 return morph;
             }
 
-            MorphJsonType ptype = ReadMorphFile(prototype, ptype_path, add_elements);
+            MorphJsonType ptype = ReadMorphFile(raw.Prototype, add_elements);
             if (raw.Name == null)
                 ptype.Name = raw.Name;
-            Resources.UnloadAsset(prototype); prototype = null;
+            Resources.UnloadAsset(prototype);prototype = null;
 
             List<Morph> temp = new List<Morph>(ptype.Morphs.Length);
             for (int x = 0; x < ptype.Morphs.Length; x++)
@@ -80,6 +90,7 @@ public class Headmesh : MonoBehaviour {
                 {
                     if (q.NameInternal.Equals(m.NameInternal))
                     {
+                        Debug.Log(m.NameInternal + " " + q.Value);
                         m.Value = q.Value;
                         m.Name = q.Name;
                         m.Category = q.Category;

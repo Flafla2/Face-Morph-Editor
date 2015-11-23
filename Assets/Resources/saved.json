@@ -1,0 +1,112 @@
+
+{
+    "Name" : "Default Male",
+    "Prototype" : "",
+    "Morphs"    : [
+        {
+            "Name" : "Size",
+            "NameInternal" : "neck_size",
+            "Category"     : "Neck",
+            "HasNegativeValues" : true,
+            "Value"             : 0.9361732006073
+        },
+        {
+            "Name" : "Size",
+            "NameInternal" : "upper_lip_size",
+            "Category"     : "Lips>Upper",
+            "HasNegativeValues" : false,
+            "Value"             : 0.835762739181519
+        },
+        {
+            "Name" : "Size",
+            "NameInternal" : "lower_lip_size",
+            "Category"     : "Lips>Lower",
+            "HasNegativeValues" : false,
+            "Value"             : 0.379066050052643
+        },
+        {
+            "Name" : "Depth",
+            "NameInternal" : "mouth_depth",
+            "Category"     : "Lips",
+            "HasNegativeValues" : true,
+            "Value"             : 0.120252251625061
+        },
+        {
+            "Name" : "Width",
+            "NameInternal" : "mouth_width",
+            "Category"     : "Lips",
+            "HasNegativeValues" : true,
+            "Value"             : 0.514153003692627
+        },
+        {
+            "Name" : "Height",
+            "NameInternal" : "nose_height",
+            "Category"     : "Nose",
+            "HasNegativeValues" : true,
+            "Value"             : -0.327465653419495
+        },
+        {
+            "Name" : "Angle",
+            "NameInternal" : "nose_angle",
+            "Category"     : "Nose",
+            "HasNegativeValues" : true,
+            "Value"             : 0.202108025550842
+        },
+        {
+            "Name" : "Depth",
+            "NameInternal" : "nose_depth",
+            "Category"     : "Nose",
+            "HasNegativeValues" : true,
+            "Value"             : 0.315276354551315
+        },
+        {
+            "Name" : "Depth",
+            "NameInternal" : "nose_tip_depth",
+            "Category"     : "Nose>Tip",
+            "HasNegativeValues" : true,
+            "Value"             : 0.766765594482422
+        },
+        {
+            "Name" : "Height",
+            "NameInternal" : "nose_tip_height",
+            "Category"     : "Nose>Tip",
+            "HasNegativeValues" : true,
+            "Value"             : 0.408056706190109
+        },
+        {
+            "Name" : "Width",
+            "NameInternal" : "chin_width",
+            "Category"     : "Chin",
+            "HasNegativeValues" : false,
+            "Value"             : 0.968225121498108
+        },
+        {
+            "Name" : "Height",
+            "NameInternal" : "chin_height",
+            "Category"     : "Chin",
+            "HasNegativeValues" : false,
+            "Value"             : 0.714991331100464
+        },
+        {
+            "Name" : "Hairline Puff",
+            "NameInternal" : "hairline_puff",
+            "Category"     : "",
+            "HasNegativeValues" : false,
+            "Value"             : 0.0
+        },
+        {
+            "Name" : "Fat",
+            "NameInternal" : "cheek_fat",
+            "Category"     : "Cheek",
+            "HasNegativeValues" : true,
+            "Value"             : 0.805743455886841
+        },
+        {
+            "Name" : "Depth",
+            "NameInternal" : "cheek_depth",
+            "Category"     : "Cheek",
+            "HasNegativeValues" : true,
+            "Value"             : -0.883741140365601
+        }
+    ]
+}

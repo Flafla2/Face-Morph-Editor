@@ -7,27 +7,56 @@ using System.Collections.Generic;
 [CustomEditor(typeof(Headmesh))]
 public class HeadmeshEditor : Editor {
 
+    // Internal //
     private MorphDirectory Root;
     private Headmesh head;
+
+    // Temporary Resource Storage //
+    private TextAsset asset;
     private string writepath = null;
+    private bool DatafilePathValid = false;
 
     void OnEnable()
     {
         head = target as Headmesh;
-        head.LoadFile();
+        ReloadDatafile();
 
-        Root = new MorphDirectory();
-        for (int x = 0; x < head.Morphs.Length; x++)
-            PlaceMorph(Root, head.Morphs[x], x);
+        string[] split = AssetDatabase.GetAssetPath(asset).Split('/');
+        Array.Resize<string>(ref split, split.Length - 1);
+        writepath = string.Join("/", split) + "/saved.json";
 
-        Undo.undoRedoPerformed += OnUndoRedo;
+        Undo.undoRedoPerformed += ReloadDatafile;
     }
 
-    private void OnUndoRedo()
+    private void ReloadDatafile()
     {
+        head.LoadFile();
+
+        asset = Resources.Load<TextAsset>(head.DatafilePath);
+        Resources.UnloadUnusedAssets();
+
+        DatafilePathValid = asset != null;
+
         Root = new MorphDirectory();
         for (int x = 0; x < head.Morphs.Length; x++)
             PlaceMorph(Root, head.Morphs[x], x);
+    }
+    
+    private string AbsolutePathToUnityPath(string absolute)
+    {
+        if (absolute.ToLower().EndsWith(".json"))
+            absolute = absolute.Substring(0, absolute.Length - 5);
+        else
+            return null;
+
+
+        int res_index = absolute.IndexOf("/Resources/");
+        if (res_index >= 0)
+            absolute = absolute.Substring(res_index + 11);
+        else
+            return null;
+
+        return absolute;
     }
 
     public override void OnInspectorGUI()
@@ -45,20 +74,33 @@ public class HeadmeshEditor : Editor {
             return;
 
         EditorGUI.BeginChangeCheck();
-        TextAsset asset = EditorGUILayout.ObjectField("Data File: ", head.Datafile, typeof(TextAsset), false) as TextAsset;
+        asset = EditorGUILayout.ObjectField("Data File: ", asset, typeof(TextAsset), false) as TextAsset;
+        
+        if(asset == null)
+        {
+            EditorGUILayout.HelpBox("Please input a data file to continue.", MessageType.Error);
+            return;
+        }
+
         if (EditorGUI.EndChangeCheck())
         {
+            string asset_path = AbsolutePathToUnityPath(AssetDatabase.GetAssetPath(asset));
+            DatafilePathValid = asset_path != null;
+
+            if (!DatafilePathValid)
+                return;
+
             Undo.RecordObject(head, "Change Headmesh Datafile");
 
-            head.Datafile = asset;
-            head.DatafilePath = AssetDatabase.GetAssetPath(asset);
-            head.LoadFile();
-
-            Root = new MorphDirectory();
-            for (int x = 0; x < head.Morphs.Length; x++)
-                PlaceMorph(Root, head.Morphs[x], x);
+            head.DatafilePath = asset_path;
+            ReloadDatafile();
 
             EditorUtility.SetDirty(head);
+        }
+        else if (!DatafilePathValid)
+        {
+            EditorGUILayout.HelpBox("Data file must be of type .json and must be located in a Resources folder or subfolder.", MessageType.Error);
+            return;
         }
 
         TraverseTree(Root);
@@ -70,28 +112,25 @@ public class HeadmeshEditor : Editor {
             EditorUtility.SetDirty(head);
         }
 
-        if (head.Datafile == null || head.DatafilePath == null)
+        if (head.DatafilePath == null)
             return;
 
-        if(writepath == null)
-        {
-            string[] split = head.DatafilePath.Split('/');
-            Array.Resize<string>(ref split, split.Length - 1);
-            writepath = string.Join("/", split) + "/saved.json";
-        }
-
+        EditorGUI.BeginChangeCheck();
         writepath = EditorGUILayout.TextField("Save Path: ",writepath);
+        if(EditorGUI.EndChangeCheck())
+            writepath = writepath.Replace('\\', '/');
 
-        GUI.enabled = writepath.EndsWith(".json");
+        string writepath_unity = AbsolutePathToUnityPath(writepath);
+        GUI.enabled = writepath_unity != null;
         if (GUILayout.Button("Save"))
         {
             string path = Application.dataPath + "/" + writepath.Substring(7); //substring because Assets/ is contained in both paths
             path = path.Replace('/', Path.DirectorySeparatorChar);
-            Debug.Log(path);
-            File.WriteAllText(head.WriteJson(), path);
-           
-            head.DatafilePath = writepath;
-            head.Datafile = Resources.Load<TextAsset>(writepath);
+            File.WriteAllText(path, head.WriteJson(!writepath_unity.Equals(head.DatafilePath)));
+
+            head.DatafilePath = writepath_unity;
+            ReloadDatafile();
+            EditorUtility.SetDirty(head);
         }
         GUI.enabled = true;
             
