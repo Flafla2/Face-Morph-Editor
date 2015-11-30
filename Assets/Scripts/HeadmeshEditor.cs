@@ -30,8 +30,6 @@ public class HeadmeshEditor : Editor {
 
     private void ReloadDatafile()
     {
-        head.LoadFile();
-
         asset = Resources.Load<TextAsset>(head.DatafilePath);
         Resources.UnloadUnusedAssets();
 
@@ -44,6 +42,9 @@ public class HeadmeshEditor : Editor {
     
     private string AbsolutePathToUnityPath(string absolute)
     {
+        if (absolute == null)
+            return null;
+
         if (absolute.ToLower().EndsWith(".json"))
             absolute = absolute.Substring(0, absolute.Length - 5);
         else
@@ -92,7 +93,7 @@ public class HeadmeshEditor : Editor {
 
             Undo.RecordObject(head, "Change Headmesh Datafile");
 
-            head.DatafilePath = asset_path;
+            head.LoadFile(asset_path);
             ReloadDatafile();
 
             EditorUtility.SetDirty(head);
@@ -121,19 +122,35 @@ public class HeadmeshEditor : Editor {
             writepath = writepath.Replace('\\', '/');
 
         string writepath_unity = AbsolutePathToUnityPath(writepath);
+
+        GUILayout.BeginHorizontal();
         GUI.enabled = writepath_unity != null;
-        if (GUILayout.Button("Save"))
+        bool absolute = GUILayout.Button("Save Absolute");
+        GUI.enabled = writepath_unity != null && !writepath_unity.Equals(head.DatafilePath);
+        bool deriv = GUILayout.Button("Save as Derivative");
+        GUI.enabled = writepath_unity != null && !writepath_unity.Equals(head.PrototypePath);
+        bool sibling = GUILayout.Button("Save as Sibling");
+        GUI.enabled = true;
+        GUILayout.EndHorizontal();
+
+        if (absolute || deriv || sibling)
         {
             string path = Application.dataPath + "/" + writepath.Substring(7); //substring because Assets/ is contained in both paths
             path = path.Replace('/', Path.DirectorySeparatorChar);
-            File.WriteAllText(path, head.WriteJson(!writepath_unity.Equals(head.DatafilePath)));
 
-            head.DatafilePath = writepath_unity;
+            Headmesh.MorphSaveType type = Headmesh.MorphSaveType.Absolute;
+            if (deriv)
+                type = Headmesh.MorphSaveType.Derivative;
+            else if (sibling)
+                type = Headmesh.MorphSaveType.Sibling;
+
+            File.WriteAllText(path, head.WriteJson(type));
+
+            head.LoadFile(writepath_unity);
             ReloadDatafile();
             EditorUtility.SetDirty(head);
         }
-        GUI.enabled = true;
-            
+        
     }
 
     private void TraverseTree(MorphDirectory p)

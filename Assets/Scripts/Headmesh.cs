@@ -14,31 +14,54 @@ public class Headmesh : MonoBehaviour {
 
     public string Name { get; set; }
 
-    public string DatafilePath = null;
+    public string DatafilePath
+    {
+        get
+        {
+            return _DatafilePath;
+        }
+    }
+    [SerializeField]
+    private string _DatafilePath;
+
+    public string PrototypePath
+    {
+        get
+        {
+            return _PrototypePath;
+        }
+    }
+    private string _PrototypePath;
+
     public SkinnedMeshRenderer SkinnedRenderer;
 
     void Awake()
     {
-        LoadFile();
+        if(_DatafilePath != null && !_DatafilePath.Trim().Equals(""))
+            LoadFile(_DatafilePath); // If there is a valud DatafilePath, load it.
     }
 
-    public void LoadFile()
+    public void LoadFile(string path)
     {
-        MorphJsonType type = ReadMorphFile(DatafilePath);
+        MorphJsonType type = ReadMorphFile(path);
+        _DatafilePath = path;
+        _PrototypePath = type.Prototype;
         _Morphs = type.Morphs;
         for (int x = 0; x < _Morphs.Length; x++)
             SetMorphValue(x, (float)Morphs[x].Value); // Sets the value on the skinned mesh
         Name = type.Name;
     }
 
-    public string WriteJson(bool prototype)
+    public string WriteJson(MorphSaveType prototype)
     {
         MorphJsonType type = new MorphJsonType();
         type.Morphs = Morphs;
         type.Name = Name;
-        if (prototype)
+        if (prototype == MorphSaveType.Derivative)
             type.Prototype = DatafilePath;
-        else
+        else if (prototype == MorphSaveType.Sibling)
+            type.Prototype = PrototypePath;
+        else if (prototype == MorphSaveType.Absolute)
             type.Prototype = "";
 
         StringBuilder sb = new StringBuilder();
@@ -46,6 +69,13 @@ public class Headmesh : MonoBehaviour {
         wr.PrettyPrint = true;
         JsonMapper.ToJson(type, wr);
         return sb.ToString();
+    }
+
+    public enum MorphSaveType
+    {
+        Absolute,   // Saves file absolutely, containing all data necessary to contruct headmesh
+        Derivative, // Saves file with prototype set to the headmesh at DatafilePath.  Only changed values are saved.
+        Sibling     // Saves file with prototype set to the prototype of the headmesh at DatafilePath.  Only changed values are saved.
     }
 
     private static MorphJsonType ReadMorphFile(string DataPath, bool add_elements = false)
@@ -78,7 +108,7 @@ public class Headmesh : MonoBehaviour {
 
             MorphJsonType ptype = ReadMorphFile(raw.Prototype, add_elements);
             if (raw.Name == null)
-                ptype.Name = raw.Name;
+                raw.Name = ptype.Name;
             Resources.UnloadAsset(prototype);prototype = null;
 
             List<Morph> temp = new List<Morph>(ptype.Morphs.Length);
