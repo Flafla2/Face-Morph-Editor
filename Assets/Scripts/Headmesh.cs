@@ -4,12 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+[ExecuteInEditMode]
 public class Headmesh : MonoBehaviour {
 
     public Morph[] Morphs
     {
         get { return _Morphs; }
     }
+    [SerializeField]
     private Morph[] _Morphs;
 
     public string Name { get; set; }
@@ -33,16 +35,27 @@ public class Headmesh : MonoBehaviour {
     }
     private string _PrototypePath;
 
-    public SkinnedMeshRenderer SkinnedRenderer;
-
-    void Awake()
+    public bool Modified
     {
-        if(_DatafilePath != null && !_DatafilePath.Trim().Equals(""))
-            LoadFile(_DatafilePath); // If there is a valud DatafilePath, load it.
+        get
+        {
+            return _Modified;
+        }
     }
+    [SerializeField]
+    private bool _Modified = false;
+
+    public SkinnedMeshRenderer SkinnedRenderer;
 
     public void LoadFile(string path)
     {
+        if (path == null || path.Trim().Equals(""))
+        {
+            Debug.Log("Loaded Invalid Path");
+            return;
+        }
+            
+        Debug.Log("Loading Datafile: " + path);
         MorphJsonType type = ReadMorphFile(path);
         _DatafilePath = path;
         _PrototypePath = type.Prototype;
@@ -50,6 +63,8 @@ public class Headmesh : MonoBehaviour {
         for (int x = 0; x < _Morphs.Length; x++)
             SetMorphValue(x, (float)Morphs[x].Value); // Sets the value on the skinned mesh
         Name = type.Name;
+
+        _Modified = false;
     }
 
     public string WriteJson(MorphSaveType prototype)
@@ -120,7 +135,6 @@ public class Headmesh : MonoBehaviour {
                 {
                     if (q.NameInternal.Equals(m.NameInternal))
                     {
-                        Debug.Log(m.NameInternal + " " + q.Value);
                         m.Value = q.Value;
                         m.Name = q.Name;
                         m.Category = q.Category;
@@ -168,6 +182,7 @@ public class Headmesh : MonoBehaviour {
         }
         
         Morphs[morph_index].Value = value;
+        _Modified = true;
     }
 
     public void Randomize()
@@ -185,6 +200,7 @@ public class Headmesh : MonoBehaviour {
         return Morphs[morph_index].Value;
     }
 
+    [System.Serializable]
     public struct Morph
     {
         public string Name;

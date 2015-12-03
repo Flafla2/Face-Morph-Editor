@@ -1,91 +1,91 @@
 
 {
-    "Name" : "Default Male",
-    "Prototype" : "",
+    "Name" : "",
+    "Prototype" : "prototype",
     "Morphs"    : [
         {
             "Name" : "Size",
             "NameInternal" : "neck_size",
             "Category"     : "Neck",
             "HasNegativeValues" : true,
-            "Value"             : 0.109522938728333
+            "Value"             : 0.41512605547905
         },
         {
             "Name" : "Size",
             "NameInternal" : "upper_lip_size",
             "Category"     : "Lips>Upper",
             "HasNegativeValues" : false,
-            "Value"             : 0.0481752157211304
+            "Value"             : 0.769120216369629
         },
         {
             "Name" : "Size",
             "NameInternal" : "lower_lip_size",
             "Category"     : "Lips>Lower",
             "HasNegativeValues" : false,
-            "Value"             : 0.445014178752899
+            "Value"             : 0.0138630867004395
         },
         {
             "Name" : "Depth",
             "NameInternal" : "mouth_depth",
             "Category"     : "Lips",
             "HasNegativeValues" : true,
-            "Value"             : -0.763473033905029
+            "Value"             : -0.881050586700439
         },
         {
             "Name" : "Width",
             "NameInternal" : "mouth_width",
             "Category"     : "Lips",
             "HasNegativeValues" : true,
-            "Value"             : -0.812425136566162
+            "Value"             : -0.161040186882019
         },
         {
             "Name" : "Height",
             "NameInternal" : "nose_height",
             "Category"     : "Nose",
             "HasNegativeValues" : true,
-            "Value"             : 0.214829802513123
+            "Value"             : 0.126764416694641
         },
         {
             "Name" : "Angle",
             "NameInternal" : "nose_angle",
             "Category"     : "Nose",
             "HasNegativeValues" : true,
-            "Value"             : -0.803452491760254
+            "Value"             : -0.439844965934753
         },
         {
             "Name" : "Depth",
             "NameInternal" : "nose_depth",
             "Category"     : "Nose",
             "HasNegativeValues" : true,
-            "Value"             : -0.950700044631958
+            "Value"             : 0.255853146314621
         },
         {
             "Name" : "Depth",
             "NameInternal" : "nose_tip_depth",
             "Category"     : "Nose>Tip",
             "HasNegativeValues" : true,
-            "Value"             : 0.287473648786545
+            "Value"             : 0.0700000002980232
         },
         {
             "Name" : "Height",
             "NameInternal" : "nose_tip_height",
             "Category"     : "Nose>Tip",
             "HasNegativeValues" : true,
-            "Value"             : -0.314599871635437
+            "Value"             : -0.498516201972961
         },
         {
             "Name" : "Width",
             "NameInternal" : "chin_width",
             "Category"     : "Chin",
             "HasNegativeValues" : false,
-            "Value"             : 0.106006860733032
+            "Value"             : 0.621456325054169
         },
         {
             "Name" : "Height",
             "NameInternal" : "chin_height",
             "Category"     : "Chin",
             "HasNegativeValues" : false,
-            "Value"             : 0.744291424751282
+            "Value"             : 0.861518621444702
         },
         {
             "Name" : "Hairline Puff",
@@ -99,14 +99,14 @@
             "NameInternal" : "cheek_fat",
             "Category"     : "Cheek",
             "HasNegativeValues" : true,
-            "Value"             : -0.742353916168213
+            "Value"             : -0.191510081291199
         },
         {
             "Name" : "Depth",
             "NameInternal" : "cheek_depth",
             "Category"     : "Cheek",
             "HasNegativeValues" : true,
-            "Value"             : 0.533696889877319
+            "Value"             : -0.0754350423812866
         }
     ]
 }

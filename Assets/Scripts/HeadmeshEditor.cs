@@ -18,6 +18,10 @@ public class HeadmeshEditor : Editor {
     void OnEnable()
     {
         head = target as Headmesh;
+
+        if (head.DatafilePath != null && !head.DatafilePath.Trim().Equals(""))
+            asset = Resources.Load<TextAsset>(head.DatafilePath);
+
         ReloadDatafile();
 
         Undo.undoRedoPerformed += ReloadDatafile;
@@ -93,7 +97,7 @@ public class HeadmeshEditor : Editor {
             return;
         }
 
-        GUILayout.Label("Current Datafile: " + head.DatafilePath);
+        GUILayout.Label("Current Datafile: " + head.DatafilePath + (head.Modified ? " (Modified)" : ""));
 
         if (Resources.Load<TextAsset>(head.DatafilePath) == null)
         {
@@ -122,16 +126,32 @@ public class HeadmeshEditor : Editor {
         }
 
         string writepath_unity = AbsolutePathToUnityPath("Assets/"+writepath);
+        string message = "Hover over save buttons for more information";
 
         GUILayout.BeginHorizontal();
+
         GUI.enabled = writepath_unity != null;
         bool absolute = GUILayout.Button("Save Absolute");
+        Rect rect = GUILayoutUtility.GetLastRect();
+        if (GUI.enabled && rect.Contains(Event.current.mousePosition))
+            message = "Save as a standalone file, without using parent files or inheritance.";
+
         GUI.enabled = writepath_unity != null && !writepath_unity.Equals(head.DatafilePath);
         bool deriv = GUILayout.Button("Save as Derivative");
-        GUI.enabled = writepath_unity != null && !writepath_unity.Equals(head.PrototypePath);
+        rect = GUILayoutUtility.GetLastRect();
+        if (GUI.enabled && rect.Contains(Event.current.mousePosition))
+            message = "Save as a derivative of the currently loaded file, using the currently loaded file ("+head.DatafilePath+") as the parent / prototype.  Only changes are saved, so any changes in the parent file will appear when loaded.";
+
+        GUI.enabled = writepath_unity != null && !head.PrototypePath.Equals("") && !writepath_unity.Equals(head.PrototypePath);
         bool sibling = GUILayout.Button("Save as Sibling");
+        rect = GUILayoutUtility.GetLastRect();
+        if (GUI.enabled && rect.Contains(Event.current.mousePosition))
+            message = "Save as a sibling of the currently loaded file, using the parent of the currently loaded file (" + head.PrototypePath + ") as the parent / prototype.  Only changes are saved, so any changes in the parent file will appear when loaded.";
+
         GUI.enabled = true;
         GUILayout.EndHorizontal();
+
+        EditorGUILayout.HelpBox(message, MessageType.Info);
 
         if (absolute || deriv || sibling)
         {
@@ -151,6 +171,11 @@ public class HeadmeshEditor : Editor {
             EditorUtility.SetDirty(head);
         }
         
+    }
+
+    public override bool RequiresConstantRepaint()
+    {
+        return false;
     }
 
     private void TraverseTree(MorphDirectory p)
