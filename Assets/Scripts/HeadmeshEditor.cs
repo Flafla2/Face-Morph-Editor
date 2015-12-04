@@ -155,7 +155,7 @@ public class HeadmeshEditor : Editor {
 
         if (absolute || deriv || sibling)
         {
-            string path = Application.dataPath + "/" + writepath; //substring because Assets/ is contained in both paths
+            string path = Application.dataPath + "/" + writepath;
             path = path.Replace('/', Path.DirectorySeparatorChar);
 
             Headmesh.MorphSaveType type = Headmesh.MorphSaveType.Absolute;
@@ -165,6 +165,7 @@ public class HeadmeshEditor : Editor {
                 type = Headmesh.MorphSaveType.Sibling;
 
             File.WriteAllText(path, head.WriteJson(type));
+            AssetDatabase.ImportAsset("Assets/" + writepath);
 
             head.LoadFile(writepath_unity);
             ReloadDatafile();

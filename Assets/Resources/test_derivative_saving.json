@@ -1,0 +1,65 @@
+
+{
+    "Name" : "Default Male",
+    "Prototype" : "prototype",
+    "Morphs"    : [
+        {
+            "NameInternal" : "neck_size",
+            "Value"        : -0.487481951713562
+        },
+        {
+            "NameInternal" : "upper_lip_size",
+            "Value"        : 0.495666563510895
+        },
+        {
+            "NameInternal" : "lower_lip_size",
+            "Value"        : 0.221760988235474
+        },
+        {
+            "NameInternal" : "mouth_depth",
+            "Value"        : 0.174609065055847
+        },
+        {
+            "NameInternal" : "mouth_width",
+            "Value"        : -0.266101717948914
+        },
+        {
+            "NameInternal" : "nose_height",
+            "Value"        : -0.512630462646484
+        },
+        {
+            "NameInternal" : "nose_angle",
+            "Value"        : 0.594550371170044
+        },
+        {
+            "NameInternal" : "nose_depth",
+            "Value"        : 0.458814829587936
+        },
+        {
+            "NameInternal" : "nose_tip_depth",
+            "Value"        : -0.38664710521698
+        },
+        {
+            "NameInternal" : "nose_tip_height",
+            "Value"        : -0.157318472862244
+        },
+        {
+            "NameInternal" : "chin_width",
+            "Value"        : 0.0587422847747803
+        },
+        {
+            "NameInternal" : "chin_height",
+            "Value"        : 0.525014460086823
+        },
+        {
+            "NameInternal" : "hairline_puff"
+        },
+        {
+            "NameInternal" : "cheek_fat",
+            "Value"        : 0.385528296232224
+        },
+        {
+            "NameInternal" : "cheek_depth",
+            "Value"        : -0.0711435079574585
+        }
+    ]
