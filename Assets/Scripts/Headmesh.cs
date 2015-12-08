@@ -61,26 +61,50 @@ namespace Morpher {
         void Start()
         {
             LoadedPeripherals = new Dictionary<string, Transform>();
+            if (_Peripherals == null)
+                _Peripherals = new Peripheral[0];
+            if (_Morphs == null)
+                _Morphs = new Morph[0];
 
+            ResetData();
+        }
+
+        private void ResetData()
+        {
             // Destroy any and all peripherals that may have persisted through saving the game.
             // This resets everything so we can reload them next.
-            if(SkinnedRenderer != null)
+            if (SkinnedRenderer != null)
             {
-                foreach(Transform t in SkinnedRenderer.bones)
+                foreach (Transform t in SkinnedRenderer.bones)
                 {
                     Transform[] arr = new Transform[t.childCount];
+                    int index = 0;
+                    foreach (Transform q in t)
+                    {
+                        arr[index] = q;
+                        index++;
+                    }
                     foreach (Transform q in arr)
-                        if (q.GetComponent<Renderer>() != null)
+                        if (q.gameObject.tag.Equals("Peripheral"))
+#if UNITY_EDITOR
+                            DestroyImmediate(q.gameObject);
+#else
                             Destroy(q.gameObject);
+#endif
                 }
             }
 
+            if (LoadedPeripherals == null)
+                LoadedPeripherals = new Dictionary<string, Transform>();
+
+            bool modified_old = Modified;
             // "Enforce" saved morphs and peripherals
             // This makes sure that nothing happened to the skinned mesh renderer, etc between loads
             for (int x = 0; x < _Morphs.Length; x++)
                 SetMorphValue(x, (float)Morphs[x].Value);
             for (int x = 0; x < _Peripherals.Length; x++)
                 SetPeripheralEnabled(x, Peripherals[x].Enabled);
+            _Modified = modified_old; // We aren't actually changing anything here, so we can revert modified.
         }
 
         public void LoadFile(string path)
@@ -110,13 +134,25 @@ namespace Morpher {
         {
             Peripheral per = Peripherals[per_index];
             string path = per.ResourcePath.ToLower();
+
+            if (LoadedPeripherals == null)
+                ResetData();
+
             bool contains = LoadedPeripherals.ContainsKey(path);
 
             if (contains && !enabled)
             {
                 Transform instance = LoadedPeripherals[path];
                 LoadedPeripherals.Remove(path);
-                Destroy(instance.gameObject);
+                if(instance != null)
+                {
+#if UNITY_EDITOR
+                    DestroyImmediate(instance.gameObject);
+#else
+                    Destroy(instance.gameObject);
+#endif
+                }
+
             }
             else if(!contains && enabled)
             {
@@ -131,9 +167,17 @@ namespace Morpher {
                 Transform bone = Array.Find<Transform>(SkinnedRenderer.bones, x => x.name.Equals(per.Bone));
 
                 GameObject instance = Instantiate(load) as GameObject;
+                instance.tag = "Peripheral";
                 instance.transform.SetParent(bone);
                 instance.transform.localPosition = per.Offset;
+                instance.transform.localScale = per.Scale;
+                instance.transform.localRotation = Quaternion.identity;
+
+                LoadedPeripherals.Add(path, instance.transform);
             }
+
+            Peripherals[per_index].Enabled = enabled;
+            _Modified = true;
         }
 
         public bool GetPeripheralEnabled(int per_index)
@@ -152,13 +196,35 @@ namespace Morpher {
 
             Transform instance = LoadedPeripherals[path];
             instance.localPosition = Offset;
+            Peripherals[per_index].Offset = Offset;
+            _Modified = true;
         }
 
         public Vector3 GetPeripheralOffset(int per_index)
         {
             return Peripherals[per_index].Offset;
         }
-    
+
+        public void SetPeripheralScale(int per_index, Vector3 Offset)
+        {
+            Peripheral per = Peripherals[per_index];
+            string path = per.ResourcePath.ToLower();
+            bool contains = LoadedPeripherals.ContainsKey(path);
+
+            if (!contains)
+                return;
+
+            Transform instance = LoadedPeripherals[path];
+            instance.localScale = Offset;
+            Peripherals[per_index].Scale = Offset;
+            _Modified = true;
+        }
+
+        public Vector3 GetPeripheralScale(int per_index)
+        {
+            return Peripherals[per_index].Scale;
+        }
+
         public void SetMorphValue(int morph_index, float value)
         {
             Morph morph = Morphs[morph_index];
@@ -223,5 +289,6 @@ namespace Morpher {
         public string ResourcePath;
         public bool Enabled;
         public Vector3 Offset;
+        public Vector3 Scale;
     }
 }

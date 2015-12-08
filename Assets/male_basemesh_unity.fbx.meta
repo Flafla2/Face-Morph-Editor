@@ -12,6 +12,8 @@ ModelImporter:
     100008: head_end
     100010: //RootNode
     100012: neck
+    100014: eyes_inside
+    100016: eyes_outside
     400000: Armature
     400002: eyes
     400004: head
@@ -19,11 +21,17 @@ ModelImporter:
     400008: head_end
     400010: //RootNode
     400012: neck
+    400014: eyes_inside
+    400016: eyes_outside
     4300000: head
     4300002: eyes
+    4300004: eyes_outside
+    4300006: eyes_inside
     9500000: //RootNode
     13700000: eyes
     13700002: head
+    13700004: eyes_inside
+    13700006: eyes_outside
   materials:
     importMaterials: 1
     materialName: 0

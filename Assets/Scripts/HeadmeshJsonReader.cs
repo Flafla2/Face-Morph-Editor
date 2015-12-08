@@ -45,7 +45,8 @@ namespace Morpher
                 temp.Add(item);
                 reader.Read(); // Skip ObjectEnd
             }
-            reader.Read(); // Skip ArrayEnd
+            //reader.Read(); // Skip ArrayEnd
+            //Debug.Log(reader.Token);
 
             return temp;
         }
@@ -85,9 +86,6 @@ namespace Morpher
                 cur.ResourcePath = Value as string;
             else if (PropertyName.StartsWith("offset"))
             {
-                if (cur.Offset == null)
-                    cur.Offset = Vector3.zero;
-
                 double val = 0;
                 Type t = Value.GetType();
                 if (t == typeof(Int32))
@@ -104,6 +102,24 @@ namespace Morpher
                 else if (PropertyName.EndsWith("_z"))
                     cur.Offset.z = (float)val;
             }
+            else if (PropertyName.StartsWith("scale"))
+            {
+                double val = 0;
+                Type t = Value.GetType();
+                if (t == typeof(Int32))
+                    val = (Int32)Value;
+                else if (t == typeof(Double))
+                    val = (Double)Value;
+                else
+                    Debug.LogError("Incorrect type for Peripheral Scale Value - should be Double or Int!");
+
+                if (PropertyName.EndsWith("_x"))
+                    cur.Scale.x = (float)val;
+                else if (PropertyName.EndsWith("_y"))
+                    cur.Scale.y = (float)val;
+                else if (PropertyName.EndsWith("_z"))
+                    cur.Scale.z = (float)val;
+            }
         }
 
         private static MorphJsonType ReadMorphFileRaw(string json)
@@ -119,7 +135,7 @@ namespace Morpher
                 if (reader.Token != JsonToken.PropertyName)
                 {
                     Debug.LogError("Json Reader ERROR: All properties in the json file must have names (Found token " + reader.Token + " instead).");
-                    return new MorphJsonType() { Name = "", Morphs = new Morph[0], Prototype = "" };
+                    return new MorphJsonType() { Name = "", Morphs = new Morph[0], Peripherals = new Peripheral[0], Prototype = "" };
                 }
 
                 JsonToken expected = JsonToken.None;
@@ -127,6 +143,8 @@ namespace Morpher
 
                 if (val.Equals("prototype") || val.Equals("name"))
                     expected = JsonToken.String;
+                else if (val.Equals("peripherals"))
+                    expected = JsonToken.ArrayStart;
                 else if (val.Equals("hasnegativevalues"))
                     expected = JsonToken.Boolean;
                 else if (val.Equals("morphs"))
@@ -139,7 +157,7 @@ namespace Morpher
                     && !(expected == JsonToken.Double && reader.Token == JsonToken.Int)) // allows for 0 instead of 0.0
                 {
                     Debug.LogError("Json Reader ERROR: Incorrect data type for property \"" + val + "\": " + reader.Token.ToString() + " (Expected " + expected + ").  Aborting.");
-                    return new MorphJsonType() { Name = "", Morphs = new Morph[0], Prototype = "" };
+                    return new MorphJsonType() { Name = "", Morphs = new Morph[0], Peripherals = new Peripheral[0], Prototype = "" };
                 }
 
                 if (val.Equals("prototype"))

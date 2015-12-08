@@ -154,6 +154,15 @@ public class HeadmeshEditor : Editor {
                 EditorUtility.SetDirty(head);
             }
 
+            EditorGUI.BeginChangeCheck();
+            p = EditorGUILayout.Vector3Field("Scale", head.GetPeripheralScale(x));
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(head, "Change Peripheral Scale (" + head.Peripherals[x].Name + ")");
+                head.SetPeripheralScale(x, p);
+                EditorUtility.SetDirty(head);
+            }
+
             EditorGUI.indentLevel--;
         }
 

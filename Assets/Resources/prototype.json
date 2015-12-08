@@ -107,5 +107,32 @@
 			"Category": "Cheek",
 			"Value": 0
 		}
+	],
+
+	"Peripherals": [
+		{
+			"Name": "Wide Brimmed Hat",
+			"Enabled": false,
+			"Bone": "head 1",
+			"ResourcePath": "Models/brimhat",
+			"Offset_X": 0.0023,
+			"Offset_Y": -0.01326,
+			"Offset_Z": -0.00849,
+			"Scale_X": 0.012353675,
+			"Scale_Y": 0.012353675,
+			"Scale_Z": 0.012353675
+		},
+		{
+			"Name": "Bonnet",
+			"Enabled": false,
+			"Bone": "head 1",
+			"ResourcePath": "Models/Bonnet",
+			"Offset_X": 0.00174,
+			"Offset_Y": -0.00522,
+			"Offset_Z": -0.0052,
+			"Scale_X": 0.01,
+			"Scale_Y": 0.01,
+			"Scale_Z": 0.01
+		}
 	]
 }
