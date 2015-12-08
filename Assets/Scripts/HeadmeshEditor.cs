@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using Morpher;
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -158,13 +159,13 @@ public class HeadmeshEditor : Editor {
             string path = Application.dataPath + "/" + writepath;
             path = path.Replace('/', Path.DirectorySeparatorChar);
 
-            Headmesh.MorphSaveType type = Headmesh.MorphSaveType.Absolute;
+            MorphSaveType type = MorphSaveType.Absolute;
             if (deriv)
-                type = Headmesh.MorphSaveType.Derivative;
+                type = MorphSaveType.Derivative;
             else if (sibling)
-                type = Headmesh.MorphSaveType.Sibling;
+                type = MorphSaveType.Sibling;
 
-            File.WriteAllText(path, head.WriteJson(type));
+            File.WriteAllText(path, HeadmeshJsonWriter.WriteJson(type,head));
             AssetDatabase.ImportAsset("Assets/" + writepath);
 
             head.LoadFile(writepath_unity);
@@ -216,7 +217,7 @@ public class HeadmeshEditor : Editor {
             EditorGUI.indentLevel--;
     }
 
-    private bool PlaceMorph(MorphDirectory p, Headmesh.Morph q, int index)
+    private bool PlaceMorph(MorphDirectory p, Morph q, int index)
     {
         if(p.Path.Equals(q.Category))
         {
@@ -256,7 +257,7 @@ public class HeadmeshEditor : Editor {
     private class MorphDirectory
     {
         public List<MorphDirectory> subdirectories;
-        public List<Headmesh.Morph> submorphs;
+        public List<Morph> submorphs;
         public List<int> submorph_indexes; // indexes in Headmesh.Morphs
 
         public string Name = "";
@@ -267,7 +268,7 @@ public class HeadmeshEditor : Editor {
         public MorphDirectory()
         {
             subdirectories = new List<MorphDirectory>();
-            submorphs = new List<Headmesh.Morph>();
+            submorphs = new List<Morph>();
             submorph_indexes = new List<int>();
         }
     }
