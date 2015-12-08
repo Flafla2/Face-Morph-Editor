@@ -11,6 +11,7 @@ public class HeadmeshEditor : Editor {
     // Internal //
     private MorphDirectory Root;
     private Headmesh head;
+    private bool[] peripheral_open;
 
     // Temporary Resource Storage //
     private TextAsset asset;
@@ -36,6 +37,8 @@ public class HeadmeshEditor : Editor {
         Root = new MorphDirectory();
         for (int x = 0; x < head.Morphs.Length; x++)
             PlaceMorph(Root, head.Morphs[x], x);
+
+        peripheral_open = new bool[head.Peripherals.Length];
     }
     
     private string AbsolutePathToUnityPath(string absolute)
@@ -109,6 +112,9 @@ public class HeadmeshEditor : Editor {
             return;
         }
 
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Facial Morph Parameters", EditorStyles.boldLabel);
+
         TraverseTree(Root);
 
         if (GUILayout.Button("Randomize"))
@@ -117,6 +123,42 @@ public class HeadmeshEditor : Editor {
             head.Randomize();
             EditorUtility.SetDirty(head);
         }
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Peripheral Selection", EditorStyles.boldLabel);
+
+        for (int x=0; x < head.Peripherals.Length; x++)
+        {
+            peripheral_open[x] = EditorGUILayout.Foldout(peripheral_open[x], head.Peripherals[x].Name);
+
+            if (!peripheral_open[x])
+                continue;
+
+            EditorGUI.indentLevel++;
+
+            EditorGUI.BeginChangeCheck();
+            bool e = EditorGUILayout.Toggle("Enabled", head.GetPeripheralEnabled(x));
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(head, "Toggle Peripheral (" + head.Peripherals[x].Name + ")");
+                head.SetPeripheralEnabled(x, e);
+                EditorUtility.SetDirty(head);
+            }
+
+            EditorGUI.BeginChangeCheck();
+            Vector3 p = EditorGUILayout.Vector3Field("Offset", head.GetPeripheralOffset(x));
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(head, "Change Peripheral Offset (" + head.Peripherals[x].Name + ")");
+                head.SetPeripheralOffset(x, p);
+                EditorUtility.SetDirty(head);
+            }
+
+            EditorGUI.indentLevel--;
+        }
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Save to JSON", EditorStyles.boldLabel);
 
         EditorGUI.BeginChangeCheck();
         writepath = EditorGUILayout.TextField("Save Path: ",writepath);

@@ -73,6 +73,39 @@ namespace Morpher
                 cur.Category = Value as string;
         }
 
+        private static void ParseJsonPeripheral (ref Peripheral cur, string PropertyName, JsonToken token, object Value)
+        {
+            if (PropertyName.Equals("name"))
+                cur.Name = Value as string;
+            else if (PropertyName.Equals("enabled"))
+                cur.Enabled = (bool)Value;
+            else if (PropertyName.Equals("bone"))
+                cur.Bone = Value as string;
+            else if (PropertyName.Equals("resourcepath"))
+                cur.ResourcePath = Value as string;
+            else if (PropertyName.StartsWith("offset"))
+            {
+                if (cur.Offset == null)
+                    cur.Offset = Vector3.zero;
+
+                double val = 0;
+                Type t = Value.GetType();
+                if (t == typeof(Int32))
+                    val = (Int32)Value;
+                else if (t == typeof(Double))
+                    val = (Double)Value;
+                else
+                    Debug.LogError("Incorrect type for Peripheral Offset Value - should be Double or Int!");
+
+                if (PropertyName.EndsWith("_x"))
+                    cur.Offset.x = (float)val;
+                else if (PropertyName.EndsWith("_y"))
+                    cur.Offset.y = (float)val;
+                else if (PropertyName.EndsWith("_z"))
+                    cur.Offset.z = (float)val;
+            }
+        }
+
         private static MorphJsonType ReadMorphFileRaw(string json)
         {
             JsonReader reader = new JsonReader(json);
@@ -120,6 +153,13 @@ namespace Morpher
                         ret.Morphs = new Morph[0];
                     else
                         ret.Morphs = morphs.ToArray();
+                } else if (val.Equals("peripherals"))
+                {
+                    List<Peripheral> peripherals = ParseJsonArray<Peripheral>(ref reader, ParseJsonPeripheral);
+                    if (peripherals == null)
+                        ret.Peripherals = new Peripheral[0];
+                    else
+                        ret.Peripherals = peripherals.ToArray();
                 }
             }
             return ret;
@@ -132,6 +172,7 @@ namespace Morpher
             {
                 MorphJsonType morph = new MorphJsonType();
                 morph.Morphs = new Morph[0];
+                morph.Peripherals = new Peripheral[0];
                 return morph;
             }
 
@@ -150,6 +191,7 @@ namespace Morpher
                 {
                     MorphJsonType morph = new MorphJsonType();
                     morph.Morphs = new Morph[0];
+                    morph.Peripherals = new Peripheral[0];
                     return morph;
                 }
 
@@ -191,5 +233,6 @@ namespace Morpher
         public string Name;
         public string Prototype;
         public Morph[] Morphs;
+        public Peripheral[] Peripherals;
     }
 }

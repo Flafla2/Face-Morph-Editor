@@ -66,6 +66,41 @@ namespace Morpher
             wr.WriteObjectEnd();
         }
 
+        private static void WriteJsonPeripheral(ref JsonWriter wr, Peripheral cur, Peripheral par, bool write_all)
+        {
+            wr.WriteObjectStart();
+            wr.WritePropertyName("ResourcePath");
+            wr.Write(cur.ResourcePath);
+
+            if (write_all || !cur.Name.Equals(par.Name))
+            {
+                wr.WritePropertyName("Name");
+                wr.Write(cur.Name);
+            }
+
+            if (write_all || !cur.Bone.Equals(par.Bone))
+            {
+                wr.WritePropertyName("Bone");
+                wr.Write(cur.Bone);
+            }
+
+            if (write_all || cur.Enabled != par.Enabled)
+            {
+                wr.WritePropertyName("Enabled");
+                wr.Write(cur.Enabled);
+            }
+
+            if (write_all || cur.Offset != par.Offset)
+            {
+                wr.Write("Offset_X");
+                wr.Write(cur.Offset.x);
+                wr.Write("Offset_Y");
+                wr.Write(cur.Offset.y);
+                wr.Write("Offset_Z");
+                wr.Write(cur.Offset.z);
+            }
+        }
+
         public static string WriteJson(MorphSaveType prototype, Headmesh mesh)
         {
             MorphJsonType type = new MorphJsonType();
@@ -82,7 +117,6 @@ namespace Morpher
             StringBuilder sb = new StringBuilder();
             JsonWriter wr = new JsonWriter(sb);
             wr.PrettyPrint = true;
-            //JsonMapper.ToJson(type, wr);
 
             wr.WriteObjectStart();
             wr.WritePropertyName("Name");
@@ -92,6 +126,9 @@ namespace Morpher
 
             WriteJsonArray<Morph>(ref wr, "Morphs", type.Morphs, loaded_ptype.Morphs, WriteJsonMorph, 
                 (Morph o1, Morph o2) => (o1.NameInternal.Equals(o2.NameInternal)));
+
+            WriteJsonArray<Peripheral>(ref wr, "Peripherals", type.Peripherals, loaded_ptype.Peripherals, WriteJsonPeripheral,
+                (Peripheral o1, Peripheral o2) => (o1.ResourcePath.Equals(o2.ResourcePath)));
 
             return sb.ToString();
         }
