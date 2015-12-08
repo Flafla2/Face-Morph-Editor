@@ -154,6 +154,7 @@ public class Headmesh : MonoBehaviour {
     {
         JsonReader reader = new JsonReader(json);
         MorphJsonType ret = new MorphJsonType();
+        ret.Prototype = "";
         while (reader.Read())
         {
             if (reader.Token == JsonToken.ObjectStart || reader.Token == JsonToken.ObjectEnd)
@@ -161,7 +162,7 @@ public class Headmesh : MonoBehaviour {
 
             if(reader.Token != JsonToken.PropertyName)
             {
-                Debug.LogError("Json Reader ERROR: All properties in the json file must have names.");
+                Debug.LogError("Json Reader ERROR: All properties in the json file must have names (Found token "+reader.Token+" instead).");
                 return new MorphJsonType() { Name = "", Morphs = new Morph[0], Prototype = "" };
             }
 
@@ -170,13 +171,18 @@ public class Headmesh : MonoBehaviour {
 
             if (val.Equals("prototype") || val.Equals("name"))
                 expected = JsonToken.String;
-            else if (val.Equals("morph"))
+            else if (val.Equals("hasnegativevalues"))
+                expected = JsonToken.Boolean;
+            else if (val.Equals("morphs"))
                 expected = JsonToken.ArrayStart;
+            else if (val.Equals("value"))
+                expected = JsonToken.Double;
 
             reader.Read();
-            if(reader.Token != expected)
+            if(reader.Token != expected 
+                && !(expected == JsonToken.Double && reader.Token == JsonToken.Int)) // allows for 0 instead of 0.0
             {
-                Debug.LogError("Json Reader ERROR: Incorrect data type for property \""+ val +"\".  Aborting.");
+                Debug.LogError("Json Reader ERROR: Incorrect data type for property \"" + val + "\": " + reader.Token.ToString() +" (Expected "+expected+").  Aborting.");
                 return new MorphJsonType() { Name = "", Morphs = new Morph[0], Prototype = "" };
             }
 
@@ -184,18 +190,17 @@ public class Headmesh : MonoBehaviour {
                 ret.Prototype = reader.Value as string;
             else if (val.Equals("name"))
                 ret.Name = reader.Value as string;
-            else if (val.Equals("morph"))
+            else if (val.Equals("morphs"))
             {
                 List<Morph> temp = new List<Morph>();
+                reader.Read(); // Skip ArrayStart
                 while(reader.Token != JsonToken.ArrayEnd)
                 {
                     if(reader.Token != JsonToken.ObjectStart)
                     {
-                        Debug.LogError("Json Reader ERROR: Morphs array must only contain objects.  Aborting.");
+                        Debug.LogError("Json Reader ERROR: Morphs array must only contain objects (Found "+reader.Token+").  Aborting.");
                         return new MorphJsonType() { Name = "", Morphs = new Morph[0], Prototype = "" };
                     }
-
-                    Morph cur = new Morph();
 
                     reader.Read();
                     while(reader.Token != JsonToken.ObjectEnd)
@@ -205,6 +210,9 @@ public class Headmesh : MonoBehaviour {
                             Debug.LogError("Json Reader ERROR: All properties in the json file must have names.");
                             return new MorphJsonType() { Name = "", Morphs = new Morph[0], Prototype = "" };
                         }
+
+                        Morph cur = new Morph() { Name = "", NameInternal = "", Category = "" };
+
                         val = (reader.Value as string).ToLower();
                         reader.Read();
                         if (val.Equals("name"))
@@ -214,13 +222,27 @@ public class Headmesh : MonoBehaviour {
                         else if (val.Equals("hasnegativevalues"))
                             cur.HasNegativeValues = (bool)reader.Value;
                         else if (val.Equals("value"))
-                            cur.Value = (double)reader.Value;
+                        {
+                            Type t = reader.Value.GetType();
+                            if (t == typeof(Int32))
+                                cur.Value = (Int32)reader.Value;
+                            else if (t == typeof(Double))
+                                cur.Value = (Double)reader.Value;
+                            else
+                                Debug.LogError("Incorrect type for Morph Value - should be Double or Int!");
+                        }
                         else if (val.Equals("category"))
                             cur.Category = reader.Value as string;
+
+                        temp.Add(cur);
+
                         reader.Read();
                     }
-                    reader.Read();
+                    reader.Read(); // Skip ObjectEnd
                 }
+                reader.Read(); // Skip ArrayEnd
+
+                ret.Morphs = temp.ToArray();
             }
         }
         return ret;
@@ -237,7 +259,7 @@ public class Headmesh : MonoBehaviour {
         }
 
         string json = Data.text;
-        MorphJsonType raw = JsonMapper.ToObject<MorphJsonType>(json);
+        MorphJsonType raw = ReadMorphFileRaw(json);
 
         bool has_prototype = !raw.Prototype.Equals("");
 
