@@ -30,6 +30,9 @@ public class HeadmeshEditor : Editor {
 
     private void ReloadDatafile()
     {
+        if (head.DatafilePath == null || head.DatafilePath.Trim().Equals(""))
+            return;
+
         Root = new MorphDirectory();
         for (int x = 0; x < head.Morphs.Length; x++)
             PlaceMorph(Root, head.Morphs[x], x);

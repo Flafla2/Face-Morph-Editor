@@ -8,7 +8,7 @@ namespace Morpher
     public class HeadmeshJsonReader
     {
 
-        private delegate T ParseJsonObject<T>(string PropertyName, JsonToken token, object Value);
+        private delegate void ParseJsonObject<T>(ref T cur, string PropertyName, JsonToken token, object Value);
 
         // Parse a generic JSON array, in the middle of a ReadMorphFileRaw() call.  We essentially begin where 
         // ReadMorphFileRaw() left off.  In the end we generate an array of whatever element we want, using the
@@ -26,6 +26,7 @@ namespace Morpher
                 }
 
                 reader.Read();
+                T item = default(T);
                 while (reader.Token != JsonToken.ObjectEnd)
                 {
                     if (reader.Token != JsonToken.PropertyName)
@@ -37,12 +38,11 @@ namespace Morpher
                     string propname = (reader.Value as string).ToLower();
                     reader.Read(); // Move from property name to actual value
 
-                    T item = parser(propname, reader.Token, reader.Value);
-                    if(item != null)
-                        temp.Add(item);
+                    parser(ref item, propname, reader.Token, reader.Value);
 
                     reader.Read(); // Go to next line token
                 }
+                temp.Add(item);
                 reader.Read(); // Skip ObjectEnd
             }
             reader.Read(); // Skip ArrayEnd
@@ -51,10 +51,8 @@ namespace Morpher
         }
 
         // Implementation of ParseJsonObject for a Morph.  Used for ParseJsonArray<Morph>()
-        private static Morph ParseJsonMorph(string PropertyName, JsonToken token, object Value)
+        private static void ParseJsonMorph(ref Morph cur, string PropertyName, JsonToken token, object Value)
         {
-            Morph cur = new Morph() { Name = "", NameInternal = "", Category = "" };
-
             if (PropertyName.Equals("name"))
                 cur.Name = Value as string;
             else if (PropertyName.Equals("nameinternal"))
@@ -73,8 +71,6 @@ namespace Morpher
             }
             else if (PropertyName.Equals("category"))
                 cur.Category = Value as string;
-
-            return cur;
         }
 
         private static MorphJsonType ReadMorphFileRaw(string json)
@@ -176,12 +172,10 @@ namespace Morpher
                             m.Category = q.Category;
                             m.HasNegativeValues = q.HasNegativeValues;
                             found = true;
-
-                            temp.Add(m);
                             break;
                         }
                     }
-                    if (!found && add_elements)
+                    if (found || add_elements)
                         temp.Add(m);
                 }
                 ptype.Morphs = temp.ToArray();
